@@ -35,6 +35,11 @@ public class Server implements HttpHandler {
             for(int i = 0; i < msgList.size(); i++) {
                 responseString = msgList.get(i);
             }
+            //If there are no messages
+            if(responseString == null) {
+                responseString = "No messages";
+            }
+
             byte [] bytes = responseString.getBytes("UTF-8");
             exchange.sendResponseHeaders(200, bytes.length);
 
