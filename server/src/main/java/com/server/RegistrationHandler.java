@@ -44,11 +44,11 @@ public class RegistrationHandler implements HttpHandler {
                     errorOutput.write(bytes);
 
                     errorOutput.close();
+                } else {
+                    exchange.sendResponseHeaders(200, -1);
+                    inputStream.close(); 
                 }
-                exchange.sendResponseHeaders(200, -1);
-                inputStream.close();
             }
-            
         } else {
             String response = "Function not supported";
             byte[] bytes = response.getBytes("UTF-8");

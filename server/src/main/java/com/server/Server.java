@@ -44,8 +44,8 @@ public class Server implements HttpHandler {
             UserAuthenticator userAuthenticator = new UserAuthenticator();
             //create context that defines path for the resource, in this case a "warning"
             HttpContext context = server.createContext("/warning", new Server());
-            HttpContext regContext = server.createContext("/registration", new RegistrationHandler(userAuthenticator));
             context.setAuthenticator(userAuthenticator);
+            HttpContext regContext = server.createContext("/registration", new RegistrationHandler(userAuthenticator));
             // creates a default executor
             server.setExecutor(null); 
             server.start(); 
