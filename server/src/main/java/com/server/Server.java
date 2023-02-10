@@ -95,7 +95,7 @@ public class Server implements HttpHandler {
     }
 
     private static SSLContext serverSSLContext(String file, String passw) throws Exception {
-        char[] passphrase = "passw".toCharArray();
+        char[] passphrase = passw.toCharArray();
         KeyStore ks = KeyStore.getInstance("JKS");
         ks.load(new FileInputStream(file), passphrase);
 
