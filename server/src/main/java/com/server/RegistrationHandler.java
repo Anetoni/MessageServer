@@ -25,12 +25,11 @@ public class RegistrationHandler implements HttpHandler {
             .lines().collect(Collectors.joining("\n"));
 
             String[] infoArray = info.split(":");
-            if(infoArray.length < 2) {
-                String errorMsg = "Invalid input";
-                byte[] bytes = errorMsg.getBytes("UTF_8"); 
-                exchange.sendResponseHeaders(400, bytes.length);
+            System.out.println(infoArray.length);
+            if(infoArray.length != 2) {
+                exchange.sendResponseHeaders(400, 0);
                 OutputStream errorOutput = exchange.getResponseBody();
-                errorOutput.write(bytes);
+                errorOutput.write("Invalid output".getBytes(StandardCharsets.UTF_8));
 
                 errorOutput.close();
                 inputStream.close();
@@ -38,15 +37,20 @@ public class RegistrationHandler implements HttpHandler {
                 boolean added = userAuthenticator.addUser(infoArray[0], infoArray[1]);
                 if(!added) {
                     String msg = "User already registered";
-                    byte[] bytes = msg.getBytes("UTF_8"); 
+                    byte[] bytes = msg.getBytes("UTF-8"); 
                     exchange.sendResponseHeaders(403, bytes.length);
                     OutputStream errorOutput = exchange.getResponseBody();
                     errorOutput.write(bytes);
 
                     errorOutput.close();
                 } else {
-                    exchange.sendResponseHeaders(200, -1);
+                    String confirmation = "Registration complete";
+                    byte[] bytes = confirmation.getBytes("UTF-8");
+                    exchange.sendResponseHeaders(200, bytes.length);
+                    OutputStream confirmationOutput = exchange.getResponseBody();
+                    confirmationOutput.write(bytes);
                     inputStream.close(); 
+                    confirmationOutput.close();
                 }
             }
         } else {
