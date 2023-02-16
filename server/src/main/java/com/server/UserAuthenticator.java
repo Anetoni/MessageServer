@@ -1,35 +1,37 @@
 package com.server;
 
-import java.util.Hashtable;
-import java.util.Map;
+import java.util.ArrayList;
 import com.sun.net.httpserver.BasicAuthenticator;
 
 public class UserAuthenticator extends BasicAuthenticator{
-    private Map<String, String> users = null;
+    private ArrayList<User> users = null;
 
     public UserAuthenticator() {
         super("warning");
-        users = new Hashtable<String, String>();
-        users.put("dummy", "passwd");
+        users = new ArrayList<User>();
     }
 
     @Override
     public boolean checkCredentials(String username, String password) {
-        boolean valid = false;
-        if(users.containsKey(username)) {
-            if(users.get(username).equals(password)) {
-                valid = true;
-            }
+        for(int i = 0; i < users.size(); i++) {
+            if(users.get(i).getUsername().equals(username) && users.get(i).getPassword().equals(password)) {
+                return true;
+            } 
         }
-        return valid; 
+        return false;
     }
 
-    public boolean addUser(String username, String password) {
-        boolean added = false;
-        if(!users.containsKey(username)) {
-            users.put(username, password);
-            added = true;
+    public boolean addUser(String username, String password, String email) {
+        for(int i = 0; i < users.size(); i++) {
+            if(users.get(i).getUsername().equals(username)) {
+                System.out.println(username + " already exists.");
+                return false;
+            }
         }
-        return added;
+        User newUser = new User(username, password, email);
+        users.add(newUser);
+        System.out.println(username + " successfully registered");
+
+        return true;
     }
 } 

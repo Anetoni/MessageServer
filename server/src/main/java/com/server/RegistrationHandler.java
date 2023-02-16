@@ -8,6 +8,9 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.sun.net.httpserver.*;
 
 public class RegistrationHandler implements HttpHandler {
@@ -19,47 +22,74 @@ public class RegistrationHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        if(exchange.getRequestMethod().equalsIgnoreCase("POST")) {
-            InputStream inputStream = exchange.getRequestBody();
-            String info = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
-            .lines().collect(Collectors.joining("\n"));
 
-            String[] infoArray = info.split(":");
-            System.out.println(infoArray.length);
-            if(infoArray.length != 2) {
-                exchange.sendResponseHeaders(400, 0);
-                OutputStream errorOutput = exchange.getResponseBody();
-                errorOutput.write("Invalid output".getBytes(StandardCharsets.UTF_8));
+        Headers headers = exchange.getRequestHeaders();
+        String contentType = "";
+        String response = "";
+        int code = 200;
+        JSONObject obj = null;
 
-                errorOutput.close();
-                inputStream.close();
-            } else {
-                boolean added = userAuthenticator.addUser(infoArray[0], infoArray[1]);
-                if(!added) {
-                    String msg = "User already registered";
-                    byte[] bytes = msg.getBytes("UTF-8"); 
-                    exchange.sendResponseHeaders(403, bytes.length);
-                    OutputStream errorOutput = exchange.getResponseBody();
-                    errorOutput.write(bytes);
-
-                    errorOutput.close();
+        try {
+            if(exchange.getRequestMethod().equalsIgnoreCase("POST")) {
+                if(headers.containsKey("Content-Type")) {
+                    contentType = headers.get("Content-Type").get(0);
                 } else {
-                    String confirmation = "Registration complete";
-                    byte[] bytes = confirmation.getBytes("UTF-8");
-                    exchange.sendResponseHeaders(200, bytes.length);
-                    OutputStream confirmationOutput = exchange.getResponseBody();
-                    confirmationOutput.write(bytes);
-                    inputStream.close(); 
-                    confirmationOutput.close();
+                    code = 411;
+                    response = "No content type in request";
                 }
+                if(contentType.equalsIgnoreCase("application/json")) {
+                    InputStream inputStream = exchange.getRequestBody();
+                    String info = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
+                    .lines().collect(Collectors.joining("\n"));
+
+                    inputStream.close();
+                    if(info == null || info.length() == 0) {
+                        code = 412;
+                        response = "No user credentials";
+                    } else {
+                        try {
+                            obj = new JSONObject(info);
+                        }catch(JSONException e) {
+                            System.out.println("JSON parse error");
+                        }
+
+                        if(obj.getString("username").length() == 0 || obj.getString("password").length() == 0) {
+                            code = 413;
+                            response = "Invalid user credentials";
+                        } else {
+                            Boolean result = userAuthenticator.addUser(obj.getString("username"), obj.getString("password"), obj.getString("email"));
+                            if(result) {
+                                code = 200;
+                                response = "User successfully registered";
+                            } else {
+                                code = 405;
+                                response = "User already exists";
+                            }
+                        }
+                    }
+                    byte[] bytes = response.getBytes("UTF-8");
+                    exchange.sendResponseHeaders(code, bytes.length);
+                    OutputStream responseStream = exchange.getResponseBody();
+                    responseStream.write(bytes);
+                    responseStream.close();
+                }
+    
+            } else {
+                response = "Function not supported";
+                code = 400;
             }
-        } else {
-            String response = "Function not supported";
+        } catch(Exception e) {
+            System.out.println(e.getStackTrace().toString());
+            code = 500;
+            response = "Internal server error";
+        }
+        if(code >= 400) {
             byte[] bytes = response.getBytes("UTF-8");
-            exchange.sendResponseHeaders(400, bytes.length);
+            exchange.sendResponseHeaders(code, bytes.length);
             OutputStream outputStream = exchange.getResponseBody();
             outputStream.write(bytes);
             outputStream.close();
         }
+        
     }
 }
