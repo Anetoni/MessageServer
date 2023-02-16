@@ -24,7 +24,7 @@ public class WarningMessage {
         return nickname;
     }
 
-    public void setNick(String nick) {
+    public void setNick(String nickname) {
         this.nickname = nickname;
     }
 
