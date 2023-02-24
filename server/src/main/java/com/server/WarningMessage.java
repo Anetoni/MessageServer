@@ -1,7 +1,7 @@
 package com.server;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.ZoneOffset;
 
 public class WarningMessage {
@@ -10,13 +10,13 @@ public class WarningMessage {
     private double latitude;
     private double longitude;
     private String dangertype;
-    private LocalDateTime sent;
+    private ZonedDateTime sent;
 
     public WarningMessage() {
         
     }
 
-    public WarningMessage(String nickname, double latitude, double longitude, LocalDateTime sent, String dangertype) {
+    public WarningMessage(String nickname, double latitude, double longitude, ZonedDateTime sent, String dangertype) {
         this.nickname = nickname;
         this.latitude = latitude;
         this.longitude = longitude;
@@ -56,7 +56,7 @@ public class WarningMessage {
         this.dangertype = dangertype;
     }
 
-    public LocalDateTime getSent() {
+    public ZonedDateTime getSent() {
         return sent;
     }
 
@@ -64,16 +64,16 @@ public class WarningMessage {
         this.nickname = nickname;
     }
 
-    public void setSent(LocalDateTime sent) {
+    public void setSent(ZonedDateTime sent) {
         this.sent = sent;
     }
     
     public long dateAsInt() {
-        return sent.toInstant(ZoneOffset.UTC).toEpochMilli();
+        return sent.toInstant().toEpochMilli();
         }
     
     public void setSent(long epoch) {
-        sent = LocalDateTime.ofInstant(Instant.ofEpochMilli(epoch), ZoneOffset.UTC);
+        sent = ZonedDateTime.ofInstant(Instant.ofEpochMilli(epoch), ZoneOffset.UTC);
         }
 
 }

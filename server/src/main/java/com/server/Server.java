@@ -22,7 +22,7 @@ public class Server {
         try {
             //create the http server to port 8001 with default logger
             HttpsServer server = HttpsServer.create(new InetSocketAddress(8001),0);
-            SSLContext sslContext = serverSSLContext(args[0], args[1]);
+            SSLContext sslContext = serverSSLContext();
             server.setHttpsConfigurator (new HttpsConfigurator(sslContext) {
                 public void configure (HttpsParameters params) {
                 InetSocketAddress remote = params.getClientAddress();
@@ -49,10 +49,10 @@ public class Server {
         
     }
 
-    private static SSLContext serverSSLContext(String file, String password) throws Exception {
-        char[] passphrase = password.toCharArray();
+    private static SSLContext serverSSLContext() throws Exception {
+        char[] passphrase = "tirppis123".toCharArray();
         KeyStore ks = KeyStore.getInstance("JKS");
-        ks.load(new FileInputStream(file), passphrase);
+        ks.load(new FileInputStream("keystore.jks"), passphrase);
 
         KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
         kmf.init(ks, passphrase);

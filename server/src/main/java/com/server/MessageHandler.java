@@ -45,7 +45,7 @@ public class MessageHandler implements HttpHandler  {
             ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MMdd'T'HH:mm:ss.SSSX");
             String dateText = now.format(formatter);
-            LocalDateTime sent = LocalDateTime.parse(dateText, formatter);
+            ZonedDateTime sent = ZonedDateTime.parse(dateText, formatter);
             if(text == null || text.length() == 0) {
                 code =412;
                 response = "No messages posted";

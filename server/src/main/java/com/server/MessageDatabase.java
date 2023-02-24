@@ -26,17 +26,20 @@ public class MessageDatabase {
     }   
 
     public void open(String dbName) throws SQLException {
-        String filePath = "C:\\Documents\\database\\db\\"+dbName+".db";
+        String filePath = "C:\\Users\\ahoan\\Documents\\database\\"+dbName+".db";
         File path = new File(filePath);
-        if(path.exists() && !path.isDirectory()) {
-            String dbPath = ("jbdc:sqlite:"+filePath);
-            dbConnection = DriverManager.getConnection(dbPath);
-        }else {
-            initializeDatabase(dbConnection);
+        boolean existed = true;
+        if(!path.exists() && !path.isDirectory()) {
+            existed = false;
+        }
+        String dbPath = ("jdbc:sqlite:"+filePath);
+        dbConnection = DriverManager.getConnection(dbPath);
+        if(existed == false) {
+            initializeDatabase();
         }
     }
 
-    private boolean initializeDatabase(Connection dbConnection) throws SQLException {
+    private boolean initializeDatabase() throws SQLException {
         System.out.println(dbConnection);
         if(null != dbConnection) {
             String createUserTable = "create table users (username varchar(50) NOT NULL, password varchar(50) NOT NULL, email varchar(50), primary key(username))";
