@@ -5,6 +5,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
@@ -21,8 +26,10 @@ import com.sun.net.httpserver.*;
 
 public class MessageHandler implements HttpHandler  {
     private static ArrayList<WarningMessage> messages = new ArrayList<WarningMessage>();
+    private MessageDatabase msgDb = null;
 
     public MessageHandler() {
+        msgDb = MessageDatabase.getInstance();
     }
 
     @Override
@@ -35,6 +42,10 @@ public class MessageHandler implements HttpHandler  {
             String text = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
             .lines().collect(Collectors.joining("\n"));
             inputStream.close();
+            ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MMdd'T'HH:mm:ss.SSSX");
+            String dateText = now.format(formatter);
+            LocalDateTime sent = LocalDateTime.parse(dateText, formatter);
             if(text == null || text.length() == 0) {
                 code =412;
                 response = "No messages posted";
@@ -44,12 +55,18 @@ public class MessageHandler implements HttpHandler  {
                 }catch (JSONException e) {
                     System.out.println("Json parse error");
                 }
-                if(msg.getString("nickname").length() == 0 || msg.getString("latitude").length() == 0 || msg.getString("longitude").length() == 0 || msg.getString("dangertype").length() == 0) {
+                if(msg.getString("nickname").length() == 0 || msg.getString("latitude").length() == 0 || msg.getString("longitude").length() == 0 || msg.getString("dangertype").length() == 0 || msg.getString("sent").length() == 0) {
                     code = 413;
                     response = "Invalid warning message";
                 } else {
-                    WarningMessage warning = new WarningMessage(msg.getString("nickname"), msg.getString("latitude"), msg.getString("longitude"), msg.getString("dangertype"));
+                    WarningMessage warning = new WarningMessage(msg.getString("nickname"), msg.getDouble("latitude"), msg.getDouble("longitude"), sent, msg.getString("dangertype"));
                     messages.add(warning);
+                    try {
+                        msgDb.setMessage(warning);
+                    } catch (SQLException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
                 }
             }
         } else if(exchange.getRequestMethod().equalsIgnoreCase("GET")) {

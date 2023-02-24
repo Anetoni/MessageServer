@@ -1,22 +1,26 @@
 package com.server;
 
-import java.util.ArrayList;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 public class WarningMessage {
 
     private String nickname;
-    private String latitude;
-    private String longitude;
+    private double latitude;
+    private double longitude;
     private String dangertype;
+    private LocalDateTime sent;
 
     public WarningMessage() {
         
     }
 
-    public WarningMessage(String nickname, String latitude, String longitude, String dangertype) {
+    public WarningMessage(String nickname, double latitude, double longitude, LocalDateTime sent, String dangertype) {
         this.nickname = nickname;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.sent = sent;
         this.dangertype = dangertype;
     }
 
@@ -28,19 +32,19 @@ public class WarningMessage {
         this.nickname = nickname;
     }
 
-    public String getLatitude() {
+    public double getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(String latitude) {
+    public void setLatitude(double latitude) {
         this.latitude = latitude;
     }
 
-    public String getLongitude() {
+    public double getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(String longitude) {
+    public void setLongitude(double longitude) {
         this.longitude = longitude;
     }
 
@@ -51,5 +55,25 @@ public class WarningMessage {
     public void setDangertype(String dangertype) {
         this.dangertype = dangertype;
     }
+
+    public LocalDateTime getSent() {
+        return sent;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void setSent(LocalDateTime sent) {
+        this.sent = sent;
+    }
     
+    public long dateAsInt() {
+        return sent.toInstant(ZoneOffset.UTC).toEpochMilli();
+        }
+    
+    public void setSent(long epoch) {
+        sent = LocalDateTime.ofInstant(Instant.ofEpochMilli(epoch), ZoneOffset.UTC);
+        }
+
 }

@@ -1,37 +1,44 @@
 package com.server;
 
-import java.util.ArrayList;
+import java.sql.SQLException;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.sun.net.httpserver.BasicAuthenticator;
 
 public class UserAuthenticator extends BasicAuthenticator{
-    private ArrayList<User> users = null;
+    private MessageDatabase msgDb = null;
 
     public UserAuthenticator() {
         super("warning");
-        users = new ArrayList<User>();
+        msgDb = MessageDatabase.getInstance();
     }
 
     @Override
     public boolean checkCredentials(String username, String password) {
-        for(int i = 0; i < users.size(); i++) {
-            if(users.get(i).getUsername().equals(username) && users.get(i).getPassword().equals(password)) {
-                return true;
-            } 
+        System.out.println("Checking credentials: " + username + " " + password);
+
+        boolean valid;
+        try {
+            valid = msgDb.authenticateUser(username, password);
+        }catch(SQLException e){
+            e.printStackTrace();
+            return false;
         }
-        return false;
+        return valid;
     }
 
-    public boolean addUser(String username, String password, String email) {
-        for(int i = 0; i < users.size(); i++) {
-            if(users.get(i).getUsername().equals(username)) {
-                System.out.println(username + " already exists.");
-                return false;
-            }
+    public boolean addUser(String username, String password, String email) throws JSONException, SQLException {
+
+        boolean result = msgDb.setUser(new JSONObject().put("username", username).put("password", password).put("email", email));
+        if(!result) {
+            System.out.println("Cannot register user");
+            return false;
         }
-        User newUser = new User(username, password, email);
-        users.add(newUser);
-        System.out.println(username + " successfully registered");
+        System.out.println(username + " registered successfully");
 
         return true;
     }
+
 } 

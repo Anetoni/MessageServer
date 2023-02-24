@@ -13,7 +13,7 @@ import java.io.FileInputStream;
 
 
 public class Server {
-    
+
     private Server() {
 
     }
@@ -31,7 +31,11 @@ public class Server {
                 params.setSSLParameters(sslparams);
                 }
             });
+            //Create instances of database and userAuthenticator
+            MessageDatabase msgDb = MessageDatabase.getInstance();
             UserAuthenticator userAuthenticator = new UserAuthenticator();
+            //create or open connection to database
+            msgDb.open("MessageDB");
             //create context that defines path for the resource, in this case a "warning"
             HttpContext context = server.createContext("/warning", new MessageHandler());
             context.setAuthenticator(userAuthenticator);
