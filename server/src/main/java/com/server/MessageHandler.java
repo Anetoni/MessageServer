@@ -43,16 +43,7 @@ public class MessageHandler implements HttpHandler  {
             String text = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
             .lines().collect(Collectors.joining("\n"));
             inputStream.close();
-            ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MMdd'T'HH:mm:ss.SSSX");
-            String dateText = now.format(formatter);
-            ZonedDateTime sent = null;
-            try{
-                sent = ZonedDateTime.parse(dateText, formatter);
-            }catch (DateTimeException e) {
-                response = "Invalid time format";
-                code = 413;
-            }
+            
             if(text == null || text.length() == 0) {
                 code =412;
                 response = "No messages posted";
@@ -62,9 +53,17 @@ public class MessageHandler implements HttpHandler  {
                 }catch (JSONException e) {
                     System.out.println("Json parse error");
                 }
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX");
+                ZonedDateTime sent = null;
+                try{
+                sent = ZonedDateTime.parse(msg.getString("sent"), formatter);
+                }catch (DateTimeException e) {
+                    response = "Invalid time format";
+                    code = 413;
+                }
                 Object checkLatitude = msg.get("latitude");
                 Object checkLongitude = msg.get("longitude");
-                if(msg.getString("nickname").length() == 0 || !(checkLatitude instanceof Number) || !(checkLongitude instanceof Number) || msg.getString("dangertype").length() == 0) {
+                if(msg.getString("nickname").length() == 0 || !(checkLatitude instanceof Number) || !(checkLongitude instanceof Number) || msg.getString("dangertype").length() == 0 || sent == null) {
                     code = 413;
                     response = "Invalid warning message";
                 } else {
