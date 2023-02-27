@@ -6,6 +6,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.ZonedDateTime;
 
 import org.json.JSONObject;
 
@@ -42,7 +43,7 @@ public class MessageDatabase {
         System.out.println(dbConnection);
         if(null != dbConnection) {
             String createUserTable = "create table users (username varchar(50) NOT NULL, password varchar(50) NOT NULL, email varchar(50), primary key(username))";
-            String createMessageTable = "create table messages (nickname varchar(50) NOT NULL, dangertype varchar(50) NOT NULL, longitude double(2, 15) NOT NULL, latitude double(2, 15) NOT NULL, sent int)";
+            String createMessageTable = "create table messages (nickname varchar(50) NOT NULL, longitude double(2, 15) NOT NULL, latitude double(2, 15) NOT NULL, sent int, dangertype varchar(50) NOT NULL)";
             Statement createStatement = dbConnection.createStatement();
             createStatement.executeUpdate(createUserTable);
             createStatement.executeUpdate(createMessageTable);
@@ -126,6 +127,7 @@ public class MessageDatabase {
         Statement queryStatement = null;
         JSONObject obj = new JSONObject();
         String getMessagesStr = "select * from messages";
+        WarningMessage msg = new WarningMessage();
         
         queryStatement = dbConnection.createStatement();
         ResultSet rs = queryStatement.executeQuery(getMessagesStr);
@@ -134,7 +136,9 @@ public class MessageDatabase {
             obj.put("nickname", rs.getString("nickname"));
             obj.put("longitude", rs.getDouble("longitude"));
             obj.put("latitude", rs.getDouble("latitude"));
-            obj.put("sent", rs.getLong("sent"));
+            msg.setSent(rs.getLong("sent"));
+            ZonedDateTime zdt = msg.getSent();
+            obj.put("sent", zdt);
             obj.put("dangertype", rs.getString("dangertype"));
         }
         return obj;

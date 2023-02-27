@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
+import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -45,7 +46,13 @@ public class MessageHandler implements HttpHandler  {
             ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MMdd'T'HH:mm:ss.SSSX");
             String dateText = now.format(formatter);
-            ZonedDateTime sent = ZonedDateTime.parse(dateText, formatter);
+            ZonedDateTime sent = null;
+            try{
+                sent = ZonedDateTime.parse(dateText, formatter);
+            }catch (DateTimeException e) {
+                response = "Invalid time format";
+                code = 413;
+            }
             if(text == null || text.length() == 0) {
                 code =412;
                 response = "No messages posted";
@@ -57,7 +64,7 @@ public class MessageHandler implements HttpHandler  {
                 }
                 Object checkLatitude = msg.get("latitude");
                 Object checkLongitude = msg.get("longitude");
-                if(msg.getString("nickname").length() == 0 || !(checkLatitude instanceof Double) || !(checkLongitude instanceof Double) || msg.getString("dangertype").length() == 0) {
+                if(msg.getString("nickname").length() == 0 || !(checkLatitude instanceof Number) || !(checkLongitude instanceof Number) || msg.getString("dangertype").length() == 0) {
                     code = 413;
                     response = "Invalid warning message";
                 } else {
