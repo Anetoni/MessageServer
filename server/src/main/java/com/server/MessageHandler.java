@@ -55,7 +55,9 @@ public class MessageHandler implements HttpHandler  {
                 }catch (JSONException e) {
                     System.out.println("Json parse error");
                 }
-                if(msg.getString("nickname").length() == 0 || msg.getString("latitude").length() == 0 || msg.getString("longitude").length() == 0 || msg.getString("dangertype").length() == 0 || msg.getString("sent").length() == 0) {
+                Object checkLatitude = msg.get("latitude");
+                Object checkLongitude = msg.get("longitude");
+                if(msg.getString("nickname").length() == 0 || !(checkLatitude instanceof Double) || !(checkLongitude instanceof Double) || msg.getString("dangertype").length() == 0) {
                     code = 413;
                     response = "Invalid warning message";
                 } else {
@@ -75,9 +77,11 @@ public class MessageHandler implements HttpHandler  {
                 exchange.sendResponseHeaders(code, -1);
             } else {
                 JSONArray retrievedMessages = new JSONArray();
-                for(int i = 0; i < messages.size(); i++) {
-                    JSONObject message = new JSONObject(messages.get(i));
-                    retrievedMessages.put(message);
+                try {
+                    retrievedMessages.put(msgDb.getMessages());
+                } catch (SQLException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
                 }
                 response = retrievedMessages.toString();
                 code = 200;

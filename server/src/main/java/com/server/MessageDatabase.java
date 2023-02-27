@@ -26,13 +26,12 @@ public class MessageDatabase {
     }   
 
     public void open(String dbName) throws SQLException {
-        String filePath = "C:\\Users\\ahoan\\Documents\\database\\"+dbName+".db";
-        File path = new File(filePath);
+        File path = new File(dbName);
         boolean existed = true;
         if(!path.exists() && !path.isDirectory()) {
             existed = false;
         }
-        String dbPath = ("jdbc:sqlite:"+filePath);
+        String dbPath = ("jdbc:sqlite:"+dbName);
         dbConnection = DriverManager.getConnection(dbPath);
         if(existed == false) {
             initializeDatabase();
@@ -131,6 +130,13 @@ public class MessageDatabase {
         queryStatement = dbConnection.createStatement();
         ResultSet rs = queryStatement.executeQuery(getMessagesStr);
 
+        while(rs.next()) {
+            obj.put("nickname", rs.getString("nickname"));
+            obj.put("longitude", rs.getDouble("longitude"));
+            obj.put("latitude", rs.getDouble("latitude"));
+            obj.put("sent", rs.getLong("sent"));
+            obj.put("dangertype", rs.getString("dangertype"));
+        }
         return obj;
     }
 
