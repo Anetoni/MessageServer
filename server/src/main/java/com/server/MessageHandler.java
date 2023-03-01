@@ -31,7 +31,7 @@ public class MessageHandler implements HttpHandler  {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        System.out.println("Request handled in thread " + Thread.currentThread().threadId()); 
+        System.out.println("Request handled in thread " + Thread.currentThread().getId()); 
         int code = 200;
         String response = "";
         WarningMessage warning = null;
