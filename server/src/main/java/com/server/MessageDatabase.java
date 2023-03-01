@@ -1,19 +1,23 @@
 package com.server;
 
 import java.io.File;
+import java.security.SecureRandom;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.ZonedDateTime;
+import java.util.Base64;
 
+import org.apache.commons.codec.digest.Crypt;
 import org.json.JSONObject;
 
 public class MessageDatabase {
 
     private Connection dbConnection = null;
     private static MessageDatabase msgDb = null;
+    private SecureRandom secureRandom = new SecureRandom();
 
     private MessageDatabase() {
         
@@ -43,7 +47,7 @@ public class MessageDatabase {
         System.out.println(dbConnection);
         if(null != dbConnection) {
             String createUserTable = "create table users (username varchar(50) NOT NULL, password varchar(50) NOT NULL, email varchar(50), primary key(username))";
-            String createMessageTable = "create table messages (nickname varchar(50) NOT NULL, longitude double(2, 15) NOT NULL, latitude double(2, 15) NOT NULL, sent int, dangertype varchar(50) NOT NULL)";
+            String createMessageTable = "create table messages (nickname varchar(50) NOT NULL, longitude double(2, 15) NOT NULL, latitude double(2, 15) NOT NULL, sent int NOT NULL, dangertype varchar(50) NOT NULL)";
             Statement createStatement = dbConnection.createStatement();
             createStatement.executeUpdate(createUserTable);
             createStatement.executeUpdate(createMessageTable);
@@ -67,7 +71,12 @@ public class MessageDatabase {
         if(checkIfUserExists(user.getString("username"))) {
             return false;
         }
-        String setUser = "insert into users " + "VALUES('"+user.getString("username") + "','" + user.getString("password") + "','" + user.getString("email") + "')";
+        byte bytes[] = new byte[13];
+        secureRandom.nextBytes(bytes);
+        String saltBytes = new String(Base64.getEncoder().encode(bytes));
+        String salt = "$6$" + saltBytes;
+        String hashedPassword = Crypt.crypt(user.getString("password"), salt);
+        String setUser = "insert into users " + "VALUES('"+user.getString("username") + "','" + hashedPassword + "','" + user.getString("email") + "')";
         Statement createStatement = dbConnection.createStatement();
         createStatement.executeUpdate(setUser);
         createStatement.close();
@@ -98,7 +107,6 @@ public class MessageDatabase {
         ResultSet rs;
 
         String getMessage = "select username, password from users where username = '" + username + "'";
-        System.out.println(username);
 
         query = dbConnection.createStatement();
         rs = query.executeQuery(getMessage);
@@ -107,8 +115,9 @@ public class MessageDatabase {
             System.out.println("Cannot find user");
             return false;
         }else {
-            String pass = rs.getString("password");
-            if(pass.equals(password)) {
+            String hashedPassword = rs.getString("password");
+            password = Crypt.crypt(password, hashedPassword);
+            if(hashedPassword.equals(password)) {
                 return true;
             } else {
                 return false;
@@ -117,7 +126,7 @@ public class MessageDatabase {
     }
 
     public void setMessage(WarningMessage msg) throws SQLException {
-        String setMsg = "Insert into messages " + "VALUES('"+msg.getNickname() + "','" + msg.getLongitude() + "','" + msg.getLatitude() + "','" + msg.dateAsInt() + "','" + msg.getDangertype() + "')";
+        String setMsg = "Insert into messages " + "VALUES('"+msg.getNickname() + "','" + msg.getLongitude() + "','" + msg.getLatitude() + "','" + msg.dateAsInt() + "','" + msg.getDangertype() + msg.getPhonenumber() + "','" + msg.getAreacode() + "')";
         Statement createStatement = dbConnection.createStatement();
         createStatement.executeUpdate(setMsg);
         createStatement.close();
@@ -140,6 +149,12 @@ public class MessageDatabase {
             ZonedDateTime zdt = msg.getSent();
             obj.put("sent", zdt);
             obj.put("dangertype", rs.getString("dangertype"));
+            if(rs.getString("phonenumber").length() != 0) {
+                obj.put("phonenumber", rs.getString("phonenumber"));
+            }
+            if(rs.getString("areacode").length() != 0) {
+                obj.put("areacode", rs.getString("areacode"));
+            }
         }
         return obj;
     }

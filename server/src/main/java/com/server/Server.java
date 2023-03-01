@@ -4,6 +4,8 @@ import com.sun.net.httpserver.*;
 
 import java.net.InetSocketAddress;
 import java.security.KeyStore;
+import java.util.concurrent.Executors;
+
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
@@ -41,7 +43,7 @@ public class Server {
             context.setAuthenticator(userAuthenticator);
             HttpContext regContext = server.createContext("/registration", new RegistrationHandler(userAuthenticator));
             // creates a default executor
-            server.setExecutor(null); 
+            server.setExecutor(Executors.newCachedThreadPool()); 
             server.start(); 
         } catch (Exception e) {
             e.printStackTrace();

@@ -7,8 +7,7 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.time.DateTimeException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -18,9 +17,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.InputStream;
-
-import org.json.JSONObject;
 
 import com.sun.net.httpserver.*;
 
@@ -35,9 +31,10 @@ public class MessageHandler implements HttpHandler  {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
+        System.out.println("Request handled in thread " + Thread.currentThread().threadId()); 
         int code = 200;
         String response = "";
-        JSONObject msg = null;
+        WarningMessage warning = null;
         if(exchange.getRequestMethod().equalsIgnoreCase("POST")) {
             InputStream inputStream = exchange.getRequestBody();
             String text = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
@@ -48,6 +45,7 @@ public class MessageHandler implements HttpHandler  {
                 code =412;
                 response = "No messages posted";
             } else {
+                JSONObject msg = null;
                 try {
                     msg = new JSONObject(text);
                 }catch (JSONException e) {
@@ -67,7 +65,15 @@ public class MessageHandler implements HttpHandler  {
                     code = 413;
                     response = "Invalid warning message";
                 } else {
-                    WarningMessage warning = new WarningMessage(msg.getString("nickname"), msg.getDouble("latitude"), msg.getDouble("longitude"), sent, msg.getString("dangertype"));
+                    if(msg.getString("phonenumber").length() != 0 && msg.getString("areacode").length() != 0) {
+                        warning = new WarningMessage(msg.getString("nickname"), msg.getDouble("latitude"), msg.getDouble("longitude"), sent, msg.getString("dangertype"), msg.getString("phonenumber"), msg.getString("areacode"));
+                    } else if(msg.getString("phonenumber").length() != 0 && msg.getString("areacode").length() == 0) {
+                        warning = new WarningMessage(msg.getString("nickname"), msg.getDouble("latitude"), msg.getDouble("longitude"), sent, msg.getString("dangertype"), msg.getString("phonenumber"));
+                    } else if(msg.getString("areacode").length() != 0 && msg.getString("phonenumber").length() == 0) {
+                        warning = new WarningMessage(msg.getString("nickname"), msg.getDouble("latitude"), msg.getDouble("longitude"), msg.getString("areacode"), sent, msg.getString("dangertype"));
+                    } else {
+                        warning = new WarningMessage(msg.getString("nickname"), msg.getDouble("latitude"), msg.getDouble("longitude"), sent, msg.getString("dangertype"));
+                    }
                     messages.add(warning);
                     try {
                         msgDb.setMessage(warning);
