@@ -49,37 +49,45 @@ public class MessageHandler implements HttpHandler  {
                 try {
                     msg = new JSONObject(text);
                 }catch (JSONException e) {
-                    System.out.println("Json parse error");
+                    response = "Json parse error";
+                    code = 403;
                 }
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX");
-                ZonedDateTime sent = null;
-                try{
-                sent = ZonedDateTime.parse(msg.getString("sent"), formatter);
-                }catch (DateTimeException e) {
-                    response = "Invalid time format";
-                    code = 413;
-                }
-                Object checkLatitude = msg.get("latitude");
-                Object checkLongitude = msg.get("longitude");
-                if(msg.getString("nickname").length() == 0 || !(checkLatitude instanceof Number) || !(checkLongitude instanceof Number) || msg.getString("dangertype").length() == 0 || sent == null) {
-                    code = 413;
-                    response = "Invalid warning message";
-                } else {
-                    if(msg.has("phonenumber") && msg.has("areacode")) {
-                        warning = new WarningMessage(msg.getString("nickname"), msg.getDouble("latitude"), msg.getDouble("longitude"), sent, msg.getString("dangertype"), msg.getString("phonenumber"), msg.getString("areacode"));
-                    } else if(msg.has("phonenumber") && !msg.has("areacode")) {
-                        warning = new WarningMessage(msg.getString("nickname"), msg.getDouble("latitude"), msg.getDouble("longitude"), sent, msg.getString("dangertype"), msg.getString("phonenumber"), null);
-                    } else if(msg.has("areacode") && !msg.has("phonenumber")) {
-                        warning = new WarningMessage(msg.getString("nickname"), msg.getDouble("latitude"), msg.getDouble("longitude"), sent, msg.getString("dangertype"), null, msg.getString("areacode"));
-                    } else {
-                        warning = new WarningMessage(msg.getString("nickname"), msg.getDouble("latitude"), msg.getDouble("longitude"), sent, msg.getString("dangertype"), null, null);
+                if(code == 200) {
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX");
+                    ZonedDateTime sent = null;
+                    try{
+                    sent = ZonedDateTime.parse(msg.getString("sent"), formatter);
+                    }catch (DateTimeException e) {
+                        response = "Invalid time format";
+                        code = 413;
                     }
-                    messages.add(warning);
-                    try {
-                        msgDb.setMessage(warning);
-                    } catch (SQLException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                    Object checkLatitude = msg.get("latitude");
+                    Object checkLongitude = msg.get("longitude");
+                    if(msg.getString("nickname").length() == 0 || !(checkLatitude instanceof Number) || !(checkLongitude instanceof Number) || msg.getString("dangertype").length() == 0 || sent == null) {
+                        code = 413;
+                        response = "Invalid warning message";
+                    } else {
+                        if(!msg.getString("dangertype").equals("Reindeer") && !msg.getString("dangertype").equals("Moose") && !msg.getString("dangertype").equals("Deer") && !msg.getString("dangertype").equals("Other")) {
+                            code = 413;
+                            response = "Invalid dangertype";
+                        } else {
+                            if(msg.has("phonenumber") && msg.has("areacode")) {
+                                warning = new WarningMessage(msg.getString("nickname"), msg.getDouble("latitude"), msg.getDouble("longitude"), sent, msg.getString("dangertype"), msg.getString("phonenumber"), msg.getString("areacode"));
+                            } else if(msg.has("phonenumber") && !msg.has("areacode")) {
+                                warning = new WarningMessage(msg.getString("nickname"), msg.getDouble("latitude"), msg.getDouble("longitude"), sent, msg.getString("dangertype"), msg.getString("phonenumber"), null);
+                            } else if(msg.has("areacode") && !msg.has("phonenumber")) {
+                                warning = new WarningMessage(msg.getString("nickname"), msg.getDouble("latitude"), msg.getDouble("longitude"), sent, msg.getString("dangertype"), null, msg.getString("areacode"));
+                            } else {
+                                warning = new WarningMessage(msg.getString("nickname"), msg.getDouble("latitude"), msg.getDouble("longitude"), sent, msg.getString("dangertype"), null, null);
+                            }
+                            messages.add(warning);
+                            try {
+                                msgDb.setMessage(warning);
+                            } catch (SQLException e) {
+                                // TODO Auto-generated catch block
+                                e.printStackTrace();
+                            }
+                        }
                     }
                 }
             }

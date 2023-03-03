@@ -126,7 +126,7 @@ public class MessageDatabase {
     }
 
     public void setMessage(WarningMessage msg) throws SQLException {
-        String setMsg = "Insert into messages " + "VALUES('"+msg.getNickname() + "','" + msg.getLongitude() + "','" + msg.getLatitude() + "','" + msg.dateAsInt() + "','" + msg.getDangertype() + msg.getPhonenumber() + "','" + msg.getAreacode() + "')";
+        String setMsg = "Insert into messages " + "VALUES('"+msg.getNickname() + "','" + msg.getLongitude() + "','" + msg.getLatitude() + "','" + msg.dateAsInt() + "','" + msg.getDangertype() + "','" + msg.getPhonenumber() + "','" + msg.getAreacode() + "')";
         Statement createStatement = dbConnection.createStatement();
         createStatement.executeUpdate(setMsg);
         createStatement.close();
@@ -149,13 +149,14 @@ public class MessageDatabase {
             ZonedDateTime zdt = msg.getSent();
             obj.put("sent", zdt);
             obj.put("dangertype", rs.getString("dangertype"));
-            if(rs.getString("phonenumber").length() != 0) {
+            if(!rs.getString("phonenumber").equals("null")) {
                 obj.put("phonenumber", rs.getString("phonenumber"));
             }
-            if(rs.getString("areacode").length() != 0) {
+            if(!rs.getString("areacode").equals("null")) {
                 obj.put("areacode", rs.getString("areacode"));
             }
         }
+        System.out.println(obj);
         return obj;
     }
 
