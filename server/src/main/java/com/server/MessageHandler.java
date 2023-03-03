@@ -65,14 +65,14 @@ public class MessageHandler implements HttpHandler  {
                     code = 413;
                     response = "Invalid warning message";
                 } else {
-                    if(msg.getString("phonenumber").length() != 0 && msg.getString("areacode").length() != 0) {
+                    if(msg.has("phonenumber") && msg.has("areacode")) {
                         warning = new WarningMessage(msg.getString("nickname"), msg.getDouble("latitude"), msg.getDouble("longitude"), sent, msg.getString("dangertype"), msg.getString("phonenumber"), msg.getString("areacode"));
-                    } else if(msg.getString("phonenumber").length() != 0 && msg.getString("areacode").length() == 0) {
-                        warning = new WarningMessage(msg.getString("nickname"), msg.getDouble("latitude"), msg.getDouble("longitude"), sent, msg.getString("dangertype"), msg.getString("phonenumber"));
-                    } else if(msg.getString("areacode").length() != 0 && msg.getString("phonenumber").length() == 0) {
-                        warning = new WarningMessage(msg.getString("nickname"), msg.getDouble("latitude"), msg.getDouble("longitude"), msg.getString("areacode"), sent, msg.getString("dangertype"));
+                    } else if(msg.has("phonenumber") && !msg.has("areacode")) {
+                        warning = new WarningMessage(msg.getString("nickname"), msg.getDouble("latitude"), msg.getDouble("longitude"), sent, msg.getString("dangertype"), msg.getString("phonenumber"), null);
+                    } else if(msg.has("areacode") && !msg.has("phonenumber")) {
+                        warning = new WarningMessage(msg.getString("nickname"), msg.getDouble("latitude"), msg.getDouble("longitude"), sent, msg.getString("dangertype"), null, msg.getString("areacode"));
                     } else {
-                        warning = new WarningMessage(msg.getString("nickname"), msg.getDouble("latitude"), msg.getDouble("longitude"), sent, msg.getString("dangertype"));
+                        warning = new WarningMessage(msg.getString("nickname"), msg.getDouble("latitude"), msg.getDouble("longitude"), sent, msg.getString("dangertype"), null, null);
                     }
                     messages.add(warning);
                     try {

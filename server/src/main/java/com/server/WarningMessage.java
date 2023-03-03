@@ -17,32 +17,7 @@ public class WarningMessage {
     public WarningMessage() {
         
     }
-    //No areacode or phonenumber
-    public WarningMessage(String nickname, double latitude, double longitude, ZonedDateTime sent, String dangertype) {
-        this.nickname = nickname;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.sent = sent;
-        this.dangertype = dangertype;
-    }
-    //No areacode
-    public WarningMessage(String nickname, double latitude, double longitude, ZonedDateTime sent, String dangertype, String phonenumber) {
-        this.nickname = nickname;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.dangertype = dangertype;
-        this.sent = sent;
-        this.phonenumber = phonenumber;
-    }
-    //No phonenumber
-    public WarningMessage(String nickname, double latitude, double longitude, String areacode, ZonedDateTime sent, String dangertype) {
-        this.nickname = nickname;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.dangertype = dangertype;
-        this.sent = sent;
-        this.areacode = areacode;
-    }
+
     //Phonenumber and areacode
     public WarningMessage(String nickname, double latitude, double longitude, ZonedDateTime sent, String dangertype, String phonenumber, String areacode) {
         this.nickname = nickname;

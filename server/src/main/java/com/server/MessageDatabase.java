@@ -47,7 +47,7 @@ public class MessageDatabase {
         System.out.println(dbConnection);
         if(null != dbConnection) {
             String createUserTable = "create table users (username varchar(50) NOT NULL, password varchar(50) NOT NULL, email varchar(50), primary key(username))";
-            String createMessageTable = "create table messages (nickname varchar(50) NOT NULL, longitude double(2, 15) NOT NULL, latitude double(2, 15) NOT NULL, sent int NOT NULL, dangertype varchar(50) NOT NULL)";
+            String createMessageTable = "create table messages (nickname varchar(50) NOT NULL, longitude double(2, 15) NOT NULL, latitude double(2, 15) NOT NULL, sent int NOT NULL, dangertype varchar(50) NOT NULL, phonenumber varchar(50), areacode varchar(50))";
             Statement createStatement = dbConnection.createStatement();
             createStatement.executeUpdate(createUserTable);
             createStatement.executeUpdate(createMessageTable);
