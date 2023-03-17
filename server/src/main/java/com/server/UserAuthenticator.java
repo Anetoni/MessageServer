@@ -15,6 +15,12 @@ public class UserAuthenticator extends BasicAuthenticator{
         msgDb = MessageDatabase.getInstance();
     }
 
+    /**
+     * Checks whether input credentials are valid and correspond with a user stored in the database
+     * @param username
+     * @param password
+     * @return boolean 
+     */
     @Override
     public boolean checkCredentials(String username, String password) {
         System.out.println("Checking credentials: " + username + " " + password);
@@ -29,6 +35,15 @@ public class UserAuthenticator extends BasicAuthenticator{
         return valid;
     }
 
+    /***
+     * Adds user in to the database 
+     * @param username
+     * @param password
+     * @param email
+     * @return boolean
+     * @throws JSONException
+     * @throws SQLException
+     */
     public boolean addUser(String username, String password, String email) throws JSONException, SQLException {
 
         boolean result = msgDb.setUser(new JSONObject().put("username", username).put("password", password).put("email", email));

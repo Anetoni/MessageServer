@@ -22,7 +22,11 @@ public class MessageDatabase {
     private MessageDatabase() {
         
     }
-
+    
+    /***
+     * Creates instance of database that is used by other classes
+     * @return MessageDatabase Instance
+     */
     public static synchronized MessageDatabase getInstance() {
         if(null == msgDb) {
             msgDb = new MessageDatabase();
@@ -30,6 +34,11 @@ public class MessageDatabase {
         return msgDb;
     }   
 
+    /***
+     * Creates connection to database
+     * @param dbName Name chosen for the database, MessageDB by default
+     * @throws SQLException
+     */
     public void open(String dbName) throws SQLException {
         File path = new File(dbName);
         boolean existed = true;
@@ -43,6 +52,11 @@ public class MessageDatabase {
         }
     }
 
+    /***
+     * Initializes database and creates separate tables for users and messages.
+     * @return true if database was created, false if creation failed.
+     * @throws SQLException
+     */
     private boolean initializeDatabase() throws SQLException {
         System.out.println(dbConnection);
         if(null != dbConnection) {
@@ -59,6 +73,10 @@ public class MessageDatabase {
         return false;
     }
 
+    /***
+     * Closes connection to database.
+     * @throws SQLException
+     */
     public void closeDB() throws SQLException {
         if(null != dbConnection) {
             dbConnection.close();
@@ -67,6 +85,12 @@ public class MessageDatabase {
         }
     }
 
+    /***
+     * Sets the input user information into the database. Hashes the password contained in the JSONObject before setting it into the database.
+     * @param user User information as a JSONObject.
+     * @return true if user was added into the database, false if user already existed.
+     * @throws SQLException
+     */
     public boolean setUser(JSONObject user) throws SQLException {
         if(checkIfUserExists(user.getString("username"))) {
             return false;
@@ -84,6 +108,12 @@ public class MessageDatabase {
         return true;
     }
 
+    /***
+     * Checks if user already exists in the database
+     * @param user username
+     * @return true if user already exists in the database, false if not.
+     * @throws SQLException
+     */
     public boolean checkIfUserExists(String user) throws SQLException {
         Statement query = null;
         ResultSet rs;
@@ -102,6 +132,13 @@ public class MessageDatabase {
         }
     }
 
+    /***
+     * Checks if given user credentials match user information contained in the database.
+     * @param username 
+     * @param password
+     * @return true if user was successfully authenticated, false if not.
+     * @throws SQLException
+     */
     public boolean authenticateUser(String username, String password) throws SQLException {
         Statement query = null;
         ResultSet rs;
@@ -125,6 +162,11 @@ public class MessageDatabase {
         }
     }
 
+    /***
+     * Receives message information as a WarningMessage object and sets it into the database.
+     * @param msg WarningMessage object containing message info.
+     * @throws SQLException
+     */
     public void setMessage(WarningMessage msg) throws SQLException {
         String setMsg = "Insert into messages " + "VALUES('"+msg.getNickname() + "','" + msg.getLongitude() + "','" + msg.getLatitude() + "','" + msg.dateAsInt() + "','" + msg.getDangertype() + "','" + msg.getPhonenumber() + "','" + msg.getAreacode() + "')";
         Statement createStatement = dbConnection.createStatement();
@@ -132,6 +174,11 @@ public class MessageDatabase {
         createStatement.close();
     }
 
+    /***
+     * Retrieves messages from database.
+     * @return Messages as JSONObject.
+     * @throws SQLException
+     */
     public JSONObject getMessages() throws SQLException {
         Statement queryStatement = null;
         JSONObject obj = new JSONObject();

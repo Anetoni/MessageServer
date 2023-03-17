@@ -29,6 +29,11 @@ public class MessageHandler implements HttpHandler  {
         msgDb = MessageDatabase.getInstance();
     }
 
+    /***
+     * Handles POST or GET requests to the server regarding sending messages
+     * @param exchange POST or GET Request, others are disregarded
+     * @throws IOException
+     */
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         System.out.println("Request handled in thread " + Thread.currentThread().getId()); 

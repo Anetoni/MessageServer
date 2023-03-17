@@ -20,6 +20,11 @@ public class RegistrationHandler implements HttpHandler {
         this.userAuthenticator = userAuthenticator;
     }
 
+    /***
+     * Handles registration to the server
+     * @param exhange
+     * @throws IOException
+     */
     @Override
     public void handle(HttpExchange exchange) throws IOException {
 
