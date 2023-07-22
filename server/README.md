@@ -1,7 +1,5 @@
 # Server
 
-**STUDENT NUMBER: Y62693111**
-
 This server project is part of University of Oulu's Programming 3 course. 
 The project includes a server into which registered users can send warning messages that include time, coordinates and warning type. 
 
